@@ -8,6 +8,14 @@ from dataset.kitti_dataset import Points, sel_xyz_in_box3d, \
     downsample_by_average_voxel, downsample_by_random_voxel
 from models.nms import boxes_3d_to_corners, overlapped_boxes_3d
 
+
+def add_gaussian_noise(cam_rgb_points, labels, noise_std=0.01):
+    xyz = cam_rgb_points.xyz
+    noise = np.random.normal(scale=noise_std, size=xyz.shape)
+    xyz += noise
+    return Points(xyz=xyz, attr=cam_rgb_points.attr), labels
+
+
 def random_jitter(cam_rgb_points, labels, xyz_std=(0.1, 0.1, 0.1)):
     xyz = cam_rgb_points.xyz
     x_delta = np.random.normal(size=(xyz.shape[0], 1), scale=xyz_std[0])
@@ -15,6 +23,7 @@ def random_jitter(cam_rgb_points, labels, xyz_std=(0.1, 0.1, 0.1)):
     z_delta = np.random.normal(size=(xyz.shape[0], 1), scale=xyz_std[2])
     xyz += np.hstack([x_delta, y_delta, z_delta])
     return Points(xyz=xyz, attr=cam_rgb_points.attr), labels
+
 
 def random_drop(cam_rgb_points, labels, drop_prob=0.5, tier_prob=None):
     if isinstance(drop_prob, list):
@@ -26,10 +35,12 @@ def random_drop(cam_rgb_points, labels, drop_prob=0.5, tier_prob=None):
         mask = np.ones_like(mask)
     return Points(xyz=xyz[mask], attr=cam_rgb_points.attr[mask]), labels
 
+
 def random_global_drop(cam_rgb_points, labels, drop_std=0.25):
     drop_prob = np.abs(np.random.normal(scale=drop_std))
     # print("drop %f "%(drop_prob))
     return random_drop(cam_rgb_points, labels, drop_prob=drop_prob)
+
 
 def random_voxel_downsample(cam_rgb_points, labels, voxel_std=0.2,
     min_voxel=0.02, max_voxel=0.8):
@@ -40,6 +51,7 @@ def random_voxel_downsample(cam_rgb_points, labels, voxel_std=0.2,
     downsampled_points = downsample_by_random_voxel(cam_rgb_points,
         voxel_size, add_rnd3d=True)
     return downsampled_points, labels
+
 
 def random_rotation_all(cam_rgb_points, labels, method_name='normal',
     yaw_std=0.3, expend_factor=(1.0, 1.1, 1.1)):
@@ -65,6 +77,7 @@ def random_rotation_all(cam_rgb_points, labels, method_name='normal',
             label['yaw'] = label['yaw']+delta_yaw
     return Points(xyz=xyz, attr=cam_rgb_points.attr), labels
 
+
 def random_flip_all(cam_rgb_points, labels, flip_prob=0.5):
     xyz = cam_rgb_points.xyz
     p =  np.random.uniform()
@@ -75,6 +88,7 @@ def random_flip_all(cam_rgb_points, labels, flip_prob=0.5):
                 label['x3d'] = -label['x3d']
                 label['yaw'] = np.pi-label['yaw']
     return Points(xyz=xyz, attr=cam_rgb_points.attr), labels
+
 
 def random_scale_all(cam_rgb_points, labels, method_name='normal',
     scale_std=0.05):
@@ -94,6 +108,7 @@ def random_scale_all(cam_rgb_points, labels, method_name='normal',
             label['width'] *= scale
             label['height'] *= scale
     return Points(xyz=xyz, attr=cam_rgb_points.attr), labels
+
 
 def random_box_rotation(cam_rgb_points, labels, max_overlap_num_allowed=0.1,
     max_trails = 100, appr_factor=100, method_name='normal',
@@ -325,6 +340,7 @@ def random_box_shift(cam_rgb_points, labels, max_overlap_num_allowed=0.1,
     assert len(new_labels) == len(labels)
     return Points(xyz=xyz, attr=cam_rgb_points.attr), new_labels
 
+
 def dilute_background(cam_rgb_points, labels, dilute_voxel_base=0.4,
     expend_factor=(4.0, 4.0, 4.0),
     keep_list=[
@@ -354,12 +370,11 @@ def dilute_background(cam_rgb_points, labels, dilute_voxel_base=0.4,
             if label['name'] != 'DontCare':
                 labels_no_dontcare.append(label)
 
-
     selected_labels = deepcopy(labels_no_dontcare)
     for label in selected_labels:
         mask += sel_xyz_in_box3d(label, xyz, expend_factor)
 
-    #assert mask.any()
+    # assert mask.any()
     if not mask.any():
         # keep two point
         mask[0] = True
@@ -376,6 +391,7 @@ def dilute_background(cam_rgb_points, labels, dilute_voxel_base=0.4,
         xyz=np.concatenate([front_xyz, diluted_background_points.xyz], axis=0),
         attr=np.concatenate([front_attr,
             diluted_background_points.attr], axis=0)), labels_no_dontcare
+
 
 def remove_background(cam_rgb_points, labels, expend_factor=(4.0, 4.0, 4.0),
     keep_list=[
@@ -427,6 +443,7 @@ def remove_background(cam_rgb_points, labels, expend_factor=(4.0, 4.0, 4.0),
     return Points(xyz=xyz[mask],
         attr=cam_rgb_points.attr[mask]), labels_no_dontcare
 
+
 def random_transition(cam_rgb_points, labels, xyz_std=(0.1, 0.1, 0.1)):
     xyz = cam_rgb_points.xyz
     x_delta = np.random.normal(scale=xyz_std[0])
@@ -457,10 +474,14 @@ aug_method_map = {
     'random_scale_all': random_scale_all,
     'random_box_global_rotation': random_box_global_rotation,
     'dilute_background':dilute_background,
+    'add_gaussian_noise': add_gaussian_noise,
 }
+
+
 def get_data_aug(aug_configs=[]):
     if len(aug_configs)==0:
         return empty
+
     def multiple_aug(cam_rgb_points, labels):
         for aug_config in aug_configs:
             aug_method = aug_method_map[aug_config['method_name']]
