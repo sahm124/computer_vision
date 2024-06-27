@@ -3,7 +3,7 @@
 from functools import partial
 
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
+import tensorflow.contrib.slim as slim+965+
 
 from models.loss import focal_loss_sigmoid, focal_loss_softmax
 from models import gnn
