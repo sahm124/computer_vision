@@ -219,9 +219,62 @@ def gen_disjointed_rnn_local_graph_v3(
     vertices = np.array([vertices_v, vertices_i]).transpose()
     return vertices
 
+
+def gen_knn_and_radius_neighbors_graph(
+        points_xyz, center_xyz, radius, k,
+        neighbors_downsample_method='random',
+        scale=None):
+    """Generate a graph using k-NN and radius neighbors.
+    If the number of neighbors within the radius is less than k,
+    add the remaining neighbors using k-NN to ensure there are at least k neighbors.
+
+    Args:
+        points_xyz: a [N, D] matrix of point coordinates.
+        center_xyz: a [M, D] matrix of center coordinates.
+        radius: radius within which neighbors are considered.
+        k: minimum number of neighbors.
+        neighbors_downsample_method: method to downsample neighbors.
+        scale: optional scaling factor for coordinates.
+
+    Returns:
+        vertices: a [P, 2] matrix of edges (src, dest).
+    """
+    if scale is not None:
+        scale = np.array(scale)
+        points_xyz = points_xyz / scale
+        center_xyz = center_xyz / scale
+
+    # Find radius neighbors
+    nbrs_radius = NearestNeighbors(
+        radius=radius, algorithm='ball_tree', n_jobs=1).fit(points_xyz)
+    radius_indices = nbrs_radius.radius_neighbors(center_xyz, return_distance=False)
+
+    # Find k-nearest neighbors
+    nbrs_knn = NearestNeighbors(
+        n_neighbors=k, algorithm='ball_tree', n_jobs=1).fit(points_xyz)
+    knn_indices = nbrs_knn.kneighbors(center_xyz, return_distance=False)
+
+    final_indices = []
+    for r_neighbors, k_neighbors in zip(radius_indices, knn_indices):
+        if len(r_neighbors) < k:
+            additional_neighbors = k_neighbors[:k - len(r_neighbors)]
+            combined_neighbors = np.unique(np.concatenate((r_neighbors, additional_neighbors)))
+            final_indices.append(combined_neighbors)
+        else:
+            final_indices.append(r_neighbors)
+
+    vertices_v = np.concatenate(final_indices)
+    vertices_i = np.concatenate(
+        [i * np.ones(neighbors.size, dtype=np.int32)
+         for i, neighbors in enumerate(final_indices)])
+    vertices = np.array([vertices_v, vertices_i]).transpose()
+    return vertices
+
+
 def get_graph_generate_fn(method_name):
     method_map = {
-        'disjointed_rnn_local_graph_v3':gen_disjointed_rnn_local_graph_v3,
+        'disjointed_rnn_local_graph_v3': gen_disjointed_rnn_local_graph_v3,
         'multi_level_local_graph_v3': gen_multi_level_local_graph_v3,
+        'knn_and_radius_neighbors_graph': gen_knn_and_radius_neighbors_graph,
     }
     return method_map[method_name]
