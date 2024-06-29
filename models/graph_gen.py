@@ -226,7 +226,7 @@ def gen_disjointed_rnn_local_graph_v3(
 
 
 def gen_knn_and_radius_neighbors_graph(
-        points_xyz, center_xyz, radius, k,
+        points_xyz, center_xyz, radius=1, k=20,
         neighbors_downsample_method='random',
         scale=None,
         base_voxel_size=None,
