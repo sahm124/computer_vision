@@ -11,7 +11,7 @@
                 "graph_gen_kwargs": {
                     "num_neighbors": -1,
                     "radius": 1.0,
-                    "k": 10  // Added 'k' parameter
+                    "k": 10
                 },
                 "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 0,
@@ -21,7 +21,7 @@
                 "graph_gen_kwargs": {
                     "num_neighbors": 256,
                     "radius": 4.0,
-                    "k": 10  // Added 'k' parameter
+                    "k": 10
                 },
                 "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 1,
@@ -164,7 +164,7 @@
                 "graph_gen_kwargs": {
                     "num_neighbors": -1,
                     "radius": 1.0,
-                    "k": 10  // Added 'k' parameter
+                    "k": 10
                 },
                 "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 0,
@@ -174,7 +174,7 @@
                 "graph_gen_kwargs": {
                     "num_neighbors": -1,
                     "radius": 4.0,
-                    "k": 10  // Added 'k' parameter
+                    "k": 10
                 },
                 "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 1,
