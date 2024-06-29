@@ -3,13 +3,12 @@
     "downsample_by_voxel_size": null,
     "eval_is_training": true,
     "graph_gen_kwargs": {
-        "add_rnd3d": true,
         "base_voxel_size": 0.8,
         "downsample_method": "random",
         "level_configs": [
             {
                 "graph_gen_kwargs": {
-                    "num_neighbors": -1,
+                    "k": 20,
                     "radius": 1.0
                 },
                 "graph_gen_method": "disjointed_rnn_local_graph_v3",
