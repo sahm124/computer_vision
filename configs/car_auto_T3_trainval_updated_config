@@ -3,30 +3,33 @@
     "downsample_by_voxel_size": null,
     "eval_is_training": true,
     "graph_gen_kwargs": {
+        "add_rnd3d": true,
         "base_voxel_size": 0.8,
         "downsample_method": "random",
         "level_configs": [
             {
                 "graph_gen_kwargs": {
-                    "k": 20,
-                    "radius": 1.0
+                    "num_neighbors": -1,
+                    "radius": 1.0,
+                    "k": 10  // Added 'k' parameter
                 },
-                "graph_gen_method": "disjointed_rnn_local_graph_v3",
+                "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 0,
                 "graph_scale": 1
             },
             {
                 "graph_gen_kwargs": {
                     "num_neighbors": 256,
-                    "radius": 4.0
+                    "radius": 4.0,
+                    "k": 10  // Added 'k' parameter
                 },
-                "graph_gen_method": "disjointed_rnn_local_graph_v3",
+                "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 1,
                 "graph_scale": 1
             }
         ]
     },
-    "graph_gen_method": "knn_and_radius_neighbors_graph",
+    "graph_gen_method": "multi_level_local_graph_v3",
     "input_features": "i",
     "label_method": "Car",
     "loss": {
@@ -160,18 +163,20 @@
             {
                 "graph_gen_kwargs": {
                     "num_neighbors": -1,
-                    "radius": 1.0
+                    "radius": 1.0,
+                    "k": 10  // Added 'k' parameter
                 },
-                "graph_gen_method": "disjointed_rnn_local_graph_v3",
+                "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 0,
                 "graph_scale": 0.5
             },
             {
                 "graph_gen_kwargs": {
                     "num_neighbors": -1,
-                    "radius": 4.0
+                    "radius": 4.0,
+                    "k": 10  // Added 'k' parameter
                 },
-                "graph_gen_method": "disjointed_rnn_local_graph_v3",
+                "graph_gen_method": "knn_and_radius_neighbors_graph",
                 "graph_level": 1,
                 "graph_scale": 0.5
             }
