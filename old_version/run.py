@@ -7,8 +7,7 @@ import multiprocessing
 from functools import partial
 
 import numpy as np
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
 import open3d
 import cv2
 from tqdm import tqdm

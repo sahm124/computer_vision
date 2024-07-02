@@ -2,10 +2,8 @@
 
 from functools import partial
 
-import tensorflow.compat.v1 as tf
-import tensorflow.compat.v1.contrib.slim as slim
-tf.disable_v2_behavior()
-
+import tensorflow as tf
+import tensorflow.contrib.slim as slim
 
 from models.loss import focal_loss_sigmoid, focal_loss_softmax
 from models import gnn
